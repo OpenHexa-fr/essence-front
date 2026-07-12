@@ -1,4 +1,9 @@
 :root {
+  /* Site conçu uniquement en thème clair : sans cette déclaration, le mode
+     sombre forcé de Chrome (inversion heuristique des couleurs) peut rendre
+     illisible le texte tapé dans les champs texte alors que d'autres éléments
+     (ex: <select>) restent lisibles par hasard — vu en conditions réelles. */
+  color-scheme: light;
   --color-primary: #1a73e8;
   --color-primary-dark: #174ea6;
   --color-primary-soft: #e8f0fe;
@@ -142,7 +147,7 @@ main {
 
 .search-bar--hero {
   width: 100%;
-  max-width: 560px;
+  max-width: 720px;
 }
 
 .search-bar--panel {
@@ -161,7 +166,13 @@ main {
   border: none;
   outline: none;
   flex: 1;
-  min-width: 0;
+  /* Avec `flex-wrap: wrap` sur .search-bar, `min-width: 0` permet au champ de
+     se faire écraser à quelques pixels par les selects/boutons voisins au lieu
+     de déclencher le retour à la ligne — vu en conditions réelles avec les
+     filtres carburant/rayon ajoutés à la barre. Un min-width réaliste force le
+     wrap à s'activer quand la place manque, plutôt que de rendre le texte tapé
+     illisible dans un champ devenu minuscule. */
+  min-width: 110px;
   font-size: 0.95rem;
   padding: 10px 4px;
   color: var(--color-text);
