@@ -3,6 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
+import { DEFAULT_FUEL, DEFAULT_RADIUS_KM, FUEL_OPTIONS, isFuelKey } from "@/lib/fuels";
+
 interface SearchBarProps {
   variant?: "hero" | "panel";
 }
@@ -11,11 +13,27 @@ export function SearchBar({ variant = "hero" }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [ville, setVille] = useState(searchParams.get("ville") ?? "");
+  const [carburant, setCarburant] = useState(() => {
+    const value = searchParams.get("carburant");
+    return value && isFuelKey(value) ? value : DEFAULT_FUEL;
+  });
+  const [radiusKm, setRadiusKm] = useState(
+    () => Number(searchParams.get("radius_km")) || DEFAULT_RADIUS_KM,
+  );
   const [geoError, setGeoError] = useState<string | null>(null);
+
+  function baseParams(): URLSearchParams {
+    const params = new URLSearchParams();
+    params.set("carburant", carburant);
+    params.set("radius_km", String(radiusKm));
+    const tri = searchParams.get("tri");
+    if (tri) params.set("tri", tri);
+    return params;
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const params = new URLSearchParams();
+    const params = baseParams();
     if (ville) params.set("ville", ville);
     router.push(`/recherche?${params.toString()}`);
   }
@@ -28,7 +46,7 @@ export function SearchBar({ variant = "hero" }: SearchBarProps) {
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const params = new URLSearchParams();
+        const params = baseParams();
         params.set("lat", String(position.coords.latitude));
         params.set("lon", String(position.coords.longitude));
         router.push(`/recherche?${params.toString()}`);
@@ -56,6 +74,43 @@ export function SearchBar({ variant = "hero" }: SearchBarProps) {
         value={ville}
         onChange={(event) => setVille(event.target.value)}
       />
+      {ville && (
+        <button
+          type="button"
+          className="search-bar__clear"
+          aria-label="Effacer la ville"
+          onClick={() => setVille("")}
+        >
+          ×
+        </button>
+      )}
+      <select
+        className="search-bar__select"
+        aria-label="Type de carburant"
+        value={carburant}
+        onChange={(event) => {
+          const { value } = event.target;
+          if (isFuelKey(value)) setCarburant(value);
+        }}
+      >
+        {FUEL_OPTIONS.map(({ key, label }) => (
+          <option key={key} value={key}>
+            {label}
+          </option>
+        ))}
+      </select>
+      <select
+        className="search-bar__select"
+        aria-label="Rayon de recherche"
+        value={radiusKm}
+        onChange={(event) => setRadiusKm(Number(event.target.value))}
+      >
+        {[2, 5, 10, 20, 50].map((km) => (
+          <option key={km} value={km}>
+            {km} km
+          </option>
+        ))}
+      </select>
       <button type="submit" className="search-bar__submit">
         Rechercher
       </button>

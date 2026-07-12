@@ -3,31 +3,32 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
-
-// Le bundler de Next.js ne résout pas les images d'icônes par défaut de Leaflet :
-// sans ce correctif, les marqueurs s'affichent sans icône.
-delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 
 export interface MapMarker {
   id: string;
   lat: number;
   lon: number;
   label: string;
+  price?: number | null;
+}
+
+export interface UserLocation {
+  lat: number;
+  lon: number;
 }
 
 interface LeafletMapInnerProps {
   markers: MapMarker[];
   activeId?: string | null;
   zoom?: number;
+  userLocation?: UserLocation | null;
+  /** Affiche des pastilles numérotées 1-2-3 pour les premiers marqueurs (résultats classés). */
+  showRank?: boolean;
 }
 
 const FRANCE_CENTER: [number, number] = [46.6, 2.2];
+const TOP_RANK_COUNT = 3;
 
 function FlyToActiveMarker({
   markers,
@@ -49,15 +50,55 @@ function FlyToActiveMarker({
   return null;
 }
 
-export default function LeafletMapInner({ markers, activeId, zoom = 13 }: LeafletMapInnerProps) {
-  const center: [number, number] = markers.length
-    ? [markers[0].lat, markers[0].lon]
-    : FRANCE_CENTER;
+// Marqueur pastille orange numéroté (top 3 du tri courant), façon "meilleur choix".
+function rankIcon(rank: number): L.DivIcon {
+  return L.divIcon({
+    className: "map-marker-rank",
+    html: `<span>${rank}</span>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+}
+
+// Pastille blanche avec le prix, façon Maps de comparateurs de prix.
+// Pas de iconSize fixe : la largeur s'adapte au texte, `transform: translateX(-50%)`
+// en CSS recentre la pastille sur le point géographique quelle que soit sa largeur.
+function priceIcon(price: number): L.DivIcon {
+  const label = `${price.toFixed(3)} €`;
+  return L.divIcon({
+    className: "map-marker-price",
+    html: `<span>${label}</span>`,
+    iconAnchor: [0, 13],
+  });
+}
+
+// Marqueur neutre (station sans prix connu pour le carburant filtré, ou fiche détail).
+function dotIcon(): L.DivIcon {
+  return L.divIcon({
+    className: "map-marker-dot",
+    html: "",
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+}
+
+export default function LeafletMapInner({
+  markers,
+  activeId,
+  zoom = 13,
+  userLocation,
+  showRank = false,
+}: LeafletMapInnerProps) {
+  const center: [number, number] = userLocation
+    ? [userLocation.lat, userLocation.lon]
+    : markers.length
+      ? [markers[0].lat, markers[0].lon]
+      : FRANCE_CENTER;
 
   return (
     <MapContainer
       center={center}
-      zoom={markers.length ? zoom : 5}
+      zoom={userLocation || markers.length ? zoom : 5}
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
@@ -65,11 +106,36 @@ export default function LeafletMapInner({ markers, activeId, zoom = 13 }: Leafle
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <FlyToActiveMarker markers={markers} activeId={activeId} />
-      {markers.map((marker) => (
-        <Marker key={marker.id} position={[marker.lat, marker.lon]}>
-          <Popup>{marker.label}</Popup>
-        </Marker>
-      ))}
+      {userLocation && (
+        <CircleMarker
+          center={[userLocation.lat, userLocation.lon]}
+          radius={7}
+          pathOptions={{
+            color: "#ffffff",
+            weight: 2,
+            fillColor: "#1e9e58",
+            fillOpacity: 1,
+          }}
+        >
+          <Popup>Votre position</Popup>
+        </CircleMarker>
+      )}
+      {markers.map((marker, index) => {
+        const isTopRank = showRank && index < TOP_RANK_COUNT;
+        const icon = isTopRank
+          ? rankIcon(index + 1)
+          : marker.price != null
+            ? priceIcon(marker.price)
+            : dotIcon();
+        return (
+          <Marker key={marker.id} position={[marker.lat, marker.lon]} icon={icon}>
+            <Popup>
+              {marker.label}
+              {marker.price != null && <> — {marker.price.toFixed(3)} €</>}
+            </Popup>
+          </Marker>
+        );
+      })}
     </MapContainer>
   );
 }

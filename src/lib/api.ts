@@ -22,6 +22,8 @@ export interface Station {
   autoroute: boolean;
 }
 
+export type StationSort = "prix" | "distance" | "recent";
+
 export interface StationSearchParams {
   ville?: string;
   code_postal?: string;
@@ -29,6 +31,7 @@ export interface StationSearchParams {
   lat?: number;
   lon?: number;
   radius_km?: number;
+  tri?: StationSort;
   search_after?: string[];
   size?: number;
 }
