@@ -26,9 +26,25 @@ export default async function StationPage({ params }: StationPageProps) {
       ]
     : [];
 
+  const directionsUrl = station.location
+    ? `https://www.google.com/maps/dir/?api=1&destination=${station.location.lat},${station.location.lon}`
+    : null;
+
   return (
     <div className="detail">
-      <h1>{station.nom ?? station.adresse ?? "Station"}</h1>
+      <div className="detail__sticky-header">
+        <h1>{station.nom ?? station.adresse ?? "Station"}</h1>
+        {directionsUrl && (
+          <a
+            className="result-item__cta"
+            href={directionsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Itinéraire
+          </a>
+        )}
+      </div>
       <p className="result-item__meta">
         {station.adresse} — {station.ville} ({station.code_postal})
       </p>

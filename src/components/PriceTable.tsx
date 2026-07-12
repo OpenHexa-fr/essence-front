@@ -7,24 +7,21 @@ interface PriceTableProps {
 
 export function PriceTable({ station }: PriceTableProps) {
   return (
-    <table className="price-table">
-      <thead>
-        <tr>
-          <th>Carburant</th>
-          <th>Prix</th>
-        </tr>
-      </thead>
-      <tbody>
-        {FUEL_OPTIONS.map(({ key, label }) => {
-          const price = station[key];
-          return (
-            <tr key={key}>
-              <td>{label}</td>
-              <td>{price !== null ? `${price.toFixed(3)} €` : "Non disponible"}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <div className="fuel-grid">
+      {FUEL_OPTIONS.map(({ key, label }) => {
+        const price = station[key];
+        return (
+          <div
+            key={key}
+            className={`fuel-grid__item${price === null ? " fuel-grid__item--unavailable" : ""}`}
+          >
+            <span className="fuel-grid__label">{label}</span>
+            <span className="fuel-grid__price">
+              {price !== null ? `${price.toFixed(3)} €` : "—"}
+            </span>
+          </div>
+        );
+      })}
+    </div>
   );
 }

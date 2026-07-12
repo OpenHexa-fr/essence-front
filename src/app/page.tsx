@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { NearbyPreview } from "@/components/NearbyPreview";
 import { SearchBar } from "@/components/SearchBar";
 
 export default function HomePage() {
@@ -16,6 +17,7 @@ export default function HomePage() {
       <Link href="/recherche" className="hero__link">
         Voir toutes les stations
       </Link>
+      <NearbyPreview />
     </section>
   );
 }

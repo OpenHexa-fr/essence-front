@@ -82,3 +82,11 @@ export async function getStationById(stationId: string): Promise<Station | null>
   }
   return (await response.json()) as Station;
 }
+
+export interface DomainStatus {
+  stations: boolean;
+}
+
+export function getStatus(): Promise<DomainStatus> {
+  return apiGet<DomainStatus>("/api/v1/status");
+}

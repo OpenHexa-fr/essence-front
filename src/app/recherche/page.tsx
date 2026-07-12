@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { SearchResults } from "@/components/SearchResults";
 import type { StationSort } from "@/lib/api";
 import { searchStations } from "@/lib/api";
@@ -14,7 +16,29 @@ interface RecherchePageProps {
   };
 }
 
-export default async function RecherchePage({ searchParams }: RecherchePageProps) {
+function ResultsSkeleton() {
+  return (
+    <div className="map-layout">
+      <div className="map-layout__panel">
+        <div className="map-layout__panel-header">
+          <div className="skeleton" style={{ height: 40, borderRadius: 999 }} />
+        </div>
+        <div className="map-layout__list">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div className="skeleton-card" key={index}>
+              <div className="skeleton" />
+              <div className="skeleton" />
+              <div className="skeleton" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="map-layout__map skeleton" />
+    </div>
+  );
+}
+
+async function ResultsLoader({ searchParams }: RecherchePageProps) {
   const lat = searchParams.lat ? Number(searchParams.lat) : undefined;
   const lon = searchParams.lon ? Number(searchParams.lon) : undefined;
   const carburant =
@@ -49,5 +73,13 @@ export default async function RecherchePage({ searchParams }: RecherchePageProps
       tri={tri}
       userLocation={userLocation}
     />
+  );
+}
+
+export default function RecherchePage({ searchParams }: RecherchePageProps) {
+  return (
+    <Suspense fallback={<ResultsSkeleton />}>
+      <ResultsLoader searchParams={searchParams} />
+    </Suspense>
   );
 }
