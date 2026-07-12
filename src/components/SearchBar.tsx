@@ -3,7 +3,11 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
-export function SearchBar() {
+interface SearchBarProps {
+  variant?: "hero" | "panel";
+}
+
+export function SearchBar({ variant = "hero" }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [ville, setVille] = useState(searchParams.get("ville") ?? "");
@@ -36,7 +40,15 @@ export function SearchBar() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="search-bar">
+    <form onSubmit={handleSubmit} className={`search-bar search-bar--${variant}`}>
+      <span className="search-bar__icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"
+            fill="currentColor"
+          />
+        </svg>
+      </span>
       <input
         type="text"
         name="ville"
@@ -44,11 +56,23 @@ export function SearchBar() {
         value={ville}
         onChange={(event) => setVille(event.target.value)}
       />
-      <button type="submit">Rechercher</button>
-      <button type="button" onClick={handleGeolocate}>
+      <button type="submit" className="search-bar__submit">
+        Rechercher
+      </button>
+      <button type="button" className="search-bar__secondary" onClick={handleGeolocate}>
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm8.94 3A9 9 0 0 0 13 3.06V1h-2v2.06A9 9 0 0 0 3.06 11H1v2h2.06A9 9 0 0 0 11 20.94V23h2v-2.06A9 9 0 0 0 20.94 13H23v-2h-2.06zM12 19a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"
+            fill="currentColor"
+          />
+        </svg>
         Autour de moi
       </button>
-      {geoError && <p role="alert">{geoError}</p>}
+      {geoError && (
+        <p className="search-bar__error" role="alert">
+          {geoError}
+        </p>
+      )}
     </form>
   );
 }

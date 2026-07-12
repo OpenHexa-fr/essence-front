@@ -16,20 +16,33 @@ export default async function StationPage({ params }: StationPageProps) {
   }
 
   const markers = station.location
-    ? [{ lat: station.location.lat, lon: station.location.lon, label: station.nom ?? "Station" }]
+    ? [
+        {
+          id: station.station_id,
+          lat: station.location.lat,
+          lon: station.location.lon,
+          label: station.nom ?? "Station",
+        },
+      ]
     : [];
 
   return (
-    <section>
+    <div className="detail">
       <h1>{station.nom ?? station.adresse ?? "Station"}</h1>
-      <p>
+      <p className="result-item__meta">
         {station.adresse} — {station.ville} ({station.code_postal})
       </p>
       {station.mise_a_jour && (
-        <p>Prix mis à jour le {new Date(station.mise_a_jour).toLocaleString("fr-FR")}</p>
+        <p className="result-item__meta">
+          Prix mis à jour le {new Date(station.mise_a_jour).toLocaleString("fr-FR")}
+        </p>
       )}
-      <Map markers={markers} />
-      <PriceTable station={station} />
-    </section>
+      <div className="detail__map">
+        <Map markers={markers} />
+      </div>
+      <div className="detail__card">
+        <PriceTable station={station} />
+      </div>
+    </div>
   );
 }
