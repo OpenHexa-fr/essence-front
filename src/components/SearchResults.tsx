@@ -2,6 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 
+import { FiltersPanel } from "@/components/FiltersPanel";
 import { Map as StationMap } from "@/components/Map";
 import { SearchBar } from "@/components/SearchBar";
 import { SortControls } from "@/components/SortControls";
@@ -65,11 +66,14 @@ export function SearchResults({
             <SearchBar variant="panel" />
           </Suspense>
           <div className="map-layout__toolbar">
-            <p className="map-layout__count">{total} station(s) trouvée(s)</p>
             <Suspense fallback={null}>
               <SortControls />
             </Suspense>
+            <p className="map-layout__count">{total} station(s) trouvée(s)</p>
           </div>
+          <Suspense fallback={null}>
+            <FiltersPanel />
+          </Suspense>
         </div>
         <div className="map-layout__list">
           {radiusWasExpanded && (

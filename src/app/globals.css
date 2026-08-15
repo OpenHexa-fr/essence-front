@@ -134,89 +134,238 @@ main {
   font-size: 0.9rem;
 }
 
-/* Barre de recherche */
-.search-bar {
+/* Barre de recherche d'adresse (géocodage BAN) + géolocalisation */
+.address-search {
   display: flex;
   align-items: center;
   gap: 8px;
   background: var(--color-surface);
   border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-md);
-  padding: 6px 8px 6px 20px;
-  border: 1px solid transparent;
+  border: 1px solid var(--color-border);
+  padding: 8px 8px 8px 18px;
+  position: relative;
   flex-wrap: wrap;
 }
 
-.search-bar--hero {
+.address-search--hero {
   width: 100%;
-  max-width: 720px;
+  max-width: 640px;
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
 }
 
-.search-bar--panel {
-  box-shadow: none;
-  border: 1px solid var(--color-border);
-  padding: 4px 6px 4px 16px;
+.address-search--panel {
+  padding: 6px 6px 6px 16px;
 }
 
-.search-bar__icon {
+.address-search__icon {
   color: var(--color-text-secondary);
   flex-shrink: 0;
   display: flex;
 }
 
-.search-bar button {
+.address-search__input {
   border: none;
-  cursor: pointer;
+  outline: none;
+  flex: 1;
+  min-width: 120px;
+  font-size: 0.9rem;
   font-family: inherit;
-}
-
-.search-bar__submit {
-  background: var(--color-primary);
-  color: white;
-  border-radius: var(--radius-pill);
-  padding: 9px 18px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.search-bar__submit:hover {
-  background: var(--color-primary-dark);
-}
-
-.search-bar__secondary {
-  background: var(--color-surface-alt);
   color: var(--color-text);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  padding: 9px 16px;
-  font-size: 0.9rem;
-  white-space: nowrap;
+  background: transparent;
+}
+
+.address-search__locate {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
-  gap: 6px;
-}
-
-.search-bar__secondary:hover {
-  background: var(--color-border);
-}
-
-.search-bar__select {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  padding: 9px 12px;
-  font-size: 0.85rem;
-  color: var(--color-text);
-  background: var(--color-surface-alt);
-  font-family: inherit;
+  justify-content: center;
   cursor: pointer;
 }
 
-.search-bar__error {
-  color: #d93025;
+.address-search__locate:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.address-search__spinner {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.address-search__error {
+  color: var(--color-danger);
   font-size: 0.85rem;
   margin: 8px 0 0;
   width: 100%;
+}
+
+/* Panneau de filtres repliable (carburant, rayon, prix max) */
+.filters-panel {
+  border-top: 1px solid var(--color-border);
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.filters-panel__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.filters-panel__chevron {
+  transition: transform 0.15s ease;
+  color: var(--color-text-secondary);
+}
+
+.filters-panel__chevron--open {
+  transform: rotate(180deg);
+}
+
+.filters-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-field__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-field__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.filter-field__value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.filter-field__scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+}
+
+/* Pastilles de type de carburant */
+.fuel-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fuel-pill {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fuel-pill:hover {
+  background: var(--color-surface-alt);
+}
+
+.fuel-pill--active {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Slider du rayon de recherche */
+.radius-slider {
+  width: 100%;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+  appearance: none;
+  cursor: pointer;
+}
+
+.radius-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid white;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.radius-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid white;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  border: none;
+}
+
+/* Prix maximum */
+.price-max-input {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  color: var(--color-text);
+  width: 100%;
+}
+
+.price-max-input:focus {
+  outline: 2px solid var(--color-primary-soft);
+  border-color: var(--color-primary);
 }
 
 /* Layout carte + panneau (page recherche, façon Google Maps) */
@@ -243,15 +392,14 @@ main {
 
 .map-layout__toolbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 8px;
   margin-top: 12px;
 }
 
 .map-layout__count {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--color-text-secondary);
   white-space: nowrap;
 }
@@ -259,6 +407,7 @@ main {
 .sort-controls {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .sort-controls__button {

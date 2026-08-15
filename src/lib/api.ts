@@ -30,7 +30,7 @@ export interface Station {
   autoroute: boolean;
 }
 
-export type StationSort = "prix" | "distance";
+export type StationSort = "score" | "prix" | "distance" | "recent";
 
 export interface StationSearchParams {
   carburant?: string;
@@ -38,6 +38,8 @@ export interface StationSearchParams {
   lon?: number;
   radius_km?: number;
   tri?: StationSort;
+  /** Ignoré côté API sans `carburant` (pas de plafond de prix sans savoir lequel). */
+  prix_max?: number;
   search_after?: string[];
   size?: number;
 }
