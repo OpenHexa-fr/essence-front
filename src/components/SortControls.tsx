@@ -7,7 +7,6 @@ import type { StationSort } from "@/lib/api";
 const TABS: { key: StationSort; label: string; requiresLocation?: boolean }[] = [
   { key: "prix", label: "Prix" },
   { key: "distance", label: "Distance", requiresLocation: true },
-  { key: "recent", label: "Récent" },
 ];
 
 export function SortControls() {

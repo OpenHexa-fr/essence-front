@@ -1,4 +1,12 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
+// Côté serveur (composants serveur, SSR), le backend est joignable via le nom
+// de service Docker interne. Côté navigateur (composants client, `fetch` dans
+// un `useEffect`), seule une URL exposée sur l'hôte est joignable : ces deux
+// contextes ne peuvent donc pas partager la même variable "publique" (inlinée
+// telle quelle au build, y compris côté serveur).
+const API_URL =
+  typeof window === "undefined"
+    ? (process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001")
+    : (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001");
 
 export interface GeoPoint {
   lat: number;
@@ -22,11 +30,9 @@ export interface Station {
   autoroute: boolean;
 }
 
-export type StationSort = "prix" | "distance" | "recent";
+export type StationSort = "prix" | "distance";
 
 export interface StationSearchParams {
-  ville?: string;
-  code_postal?: string;
   carburant?: string;
   lat?: number;
   lon?: number;

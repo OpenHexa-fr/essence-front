@@ -16,9 +16,21 @@ interface SearchResultsProps {
   carburant?: FuelKey;
   tri?: StationSort;
   userLocation?: { lat: number; lon: number } | null;
+  /** Rayon (km) demandé par l'utilisateur, avant élargissement automatique. */
+  requestedRadiusKm?: number;
+  /** Rayon (km) effectivement utilisé pour cette recherche. */
+  effectiveRadiusKm?: number;
 }
 
-export function SearchResults({ items, total, carburant, tri, userLocation }: SearchResultsProps) {
+export function SearchResults({
+  items,
+  total,
+  carburant,
+  tri,
+  userLocation,
+  requestedRadiusKm,
+  effectiveRadiusKm,
+}: SearchResultsProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const markers = items
@@ -42,6 +54,9 @@ export function SearchResults({ items, total, carburant, tri, userLocation }: Se
     return new Map(entries);
   }, [items, userLocation]);
 
+  const radiusWasExpanded =
+    requestedRadiusKm != null && effectiveRadiusKm != null && effectiveRadiusKm > requestedRadiusKm;
+
   return (
     <div className="map-layout">
       <div className="map-layout__panel">
@@ -57,8 +72,16 @@ export function SearchResults({ items, total, carburant, tri, userLocation }: Se
           </div>
         </div>
         <div className="map-layout__list">
+          {radiusWasExpanded && (
+            <p className="map-layout__notice">
+              Aucune station à moins de {requestedRadiusKm} km — rayon élargi à{" "}
+              {effectiveRadiusKm} km.
+            </p>
+          )}
           {items.length === 0 && (
-            <p className="map-layout__empty">Aucune station pour cette recherche.</p>
+            <p className="map-layout__empty">
+              Aucune station trouvée, même en élargissant le rayon de recherche.
+            </p>
           )}
           {items.map((station, index) => (
             <StationCard

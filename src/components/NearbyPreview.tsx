@@ -4,8 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { searchStations, type Station } from "@/lib/api";
-import { DEFAULT_FUEL } from "@/lib/fuels";
+import { DEFAULT_FUEL, FUEL_OPTIONS } from "@/lib/fuels";
 import { distanceKm } from "@/lib/geo";
+
+const DEFAULT_FUEL_LABEL =
+  FUEL_OPTIONS.find(({ key }) => key === DEFAULT_FUEL)?.label ?? DEFAULT_FUEL;
 
 interface PreviewItem {
   station: Station;
@@ -20,7 +23,7 @@ export function NearbyPreview() {
 
     async function loadGeneric() {
       try {
-        const results = await searchStations({ carburant: DEFAULT_FUEL, tri: "recent", size: 3 });
+        const results = await searchStations({ carburant: DEFAULT_FUEL, tri: "prix", size: 3 });
         if (!cancelled) {
           setItems(results.items.map((station) => ({ station, distanceKm: null })));
         }
@@ -88,6 +91,14 @@ export function NearbyPreview() {
               {item.station.ville}
               {item.distanceKm !== null ? ` · ${item.distanceKm.toFixed(1)} km` : ""}
             </p>
+            {item.station[DEFAULT_FUEL] != null && (
+              <div className="result-item__price-row">
+                <span className="result-item__price">
+                  {item.station[DEFAULT_FUEL]?.toFixed(3)} €
+                </span>
+                <span className="result-item__fuel">{DEFAULT_FUEL_LABEL}</span>
+              </div>
+            )}
           </Link>
         ))}
       </div>

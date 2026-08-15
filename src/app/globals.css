@@ -164,28 +164,6 @@ main {
   display: flex;
 }
 
-.search-bar input {
-  border: none;
-  outline: none;
-  flex: 1;
-  /* Avec `flex-wrap: wrap` sur .search-bar, `min-width: 0` permet au champ de
-     se faire écraser à quelques pixels par les selects/boutons voisins au lieu
-     de déclencher le retour à la ligne — vu en conditions réelles avec les
-     filtres carburant/rayon ajoutés à la barre. Un min-width réaliste force le
-     wrap à s'activer quand la place manque, plutôt que de rendre le texte tapé
-     illisible dans un champ devenu minuscule. */
-  min-width: 110px;
-  font-size: 0.95rem;
-  padding: 10px 4px;
-  color: var(--color-text);
-  font-family: inherit;
-  background: transparent;
-}
-
-.search-bar input::placeholder {
-  color: var(--color-text-secondary);
-}
-
 .search-bar button {
   border: none;
   cursor: pointer;
@@ -232,24 +210,6 @@ main {
   background: var(--color-surface-alt);
   font-family: inherit;
   cursor: pointer;
-}
-
-.search-bar__clear {
-  background: transparent;
-  color: var(--color-text-secondary);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.search-bar__clear:hover {
-  background: var(--color-surface-alt);
 }
 
 .search-bar__error {
@@ -338,6 +298,15 @@ main {
   padding: 24px 16px;
   color: var(--color-text-secondary);
   font-size: 0.9rem;
+}
+
+.map-layout__notice {
+  margin: 0;
+  padding: 10px 16px;
+  background: var(--color-surface-alt);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .map-layout__map {

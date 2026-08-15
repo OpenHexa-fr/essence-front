@@ -12,7 +12,6 @@ interface SearchBarProps {
 export function SearchBar({ variant = "hero" }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [ville, setVille] = useState(searchParams.get("ville") ?? "");
   const [carburant, setCarburant] = useState(() => {
     const value = searchParams.get("carburant");
     return value && isFuelKey(value) ? value : DEFAULT_FUEL;
@@ -34,7 +33,6 @@ export function SearchBar({ variant = "hero" }: SearchBarProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const params = baseParams();
-    if (ville) params.set("ville", ville);
     router.push(`/recherche?${params.toString()}`);
   }
 
@@ -67,23 +65,6 @@ export function SearchBar({ variant = "hero" }: SearchBarProps) {
           />
         </svg>
       </span>
-      <input
-        type="text"
-        name="ville"
-        placeholder="Ville"
-        value={ville}
-        onChange={(event) => setVille(event.target.value)}
-      />
-      {ville && (
-        <button
-          type="button"
-          className="search-bar__clear"
-          aria-label="Effacer la ville"
-          onClick={() => setVille("")}
-        >
-          ×
-        </button>
-      )}
       <select
         className="search-bar__select"
         aria-label="Type de carburant"
