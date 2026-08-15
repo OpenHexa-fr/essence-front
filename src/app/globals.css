@@ -320,6 +320,12 @@ main {
   font-weight: 600;
 }
 
+.fuel-pills__hint {
+  margin: 6px 0 0;
+  font-size: 0.72rem;
+  color: var(--color-text-secondary);
+}
+
 /* Slider du rayon de recherche */
 .radius-slider {
   width: 100%;
@@ -463,6 +469,33 @@ main {
   position: relative;
 }
 
+/* Séparateurs de section dans la liste de résultats (Top 3 / Autres) */
+.map-layout__section-title {
+  margin: 0;
+  padding: 10px 16px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.map-layout__section-count {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.map-layout__freshness {
+  margin: 0;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
 /* Éléments de liste de résultats */
 .result-item {
   border-bottom: 1px solid var(--color-border);
@@ -506,6 +539,23 @@ main {
 
 .result-item__avatar--rank {
   background: var(--color-rank);
+}
+
+/* Score de pertinence (prix + distance), en haut à droite de la carte */
+.result-item__score {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  color: var(--color-text-secondary);
+  font-size: 0.65rem;
+}
+
+.result-item__score strong {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
 }
 
 .result-item__headline {

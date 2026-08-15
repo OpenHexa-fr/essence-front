@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { SearchResults } from "@/components/SearchResults";
 import type { PaginatedResponse, Station, StationSort } from "@/lib/api";
 import { searchStations } from "@/lib/api";
-import { DEFAULT_RADIUS_KM, isFuelKey, type FuelKey } from "@/lib/fuels";
+import { DEFAULT_RADIUS_KM, isCarburantParam } from "@/lib/fuels";
 
 // Rayons essayés successivement quand la recherche ne trouve rien au rayon
 // demandé (fréquent avec le rayon par défaut de 5 km hors des grandes villes) :
@@ -21,9 +21,10 @@ interface RecherchePageProps {
   };
 }
 
-/** "Tous" (pas de carburant précis) est un état valide, pas juste un repli sur DEFAULT_FUEL. */
-function resolveCarburant(value: string | undefined): FuelKey | undefined {
-  return value && isFuelKey(value) ? value : undefined;
+/** "Tous" (pas de carburant précis) est un état valide, pas juste un repli sur DEFAULT_FUEL.
+ * `value` peut être une clé de famille (ex. "sans_plomb") ou un carburant simple. */
+function resolveCarburant(value: string | undefined): string | undefined {
+  return value && isCarburantParam(value) ? value : undefined;
 }
 
 /**

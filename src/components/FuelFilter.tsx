@@ -2,16 +2,16 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { FUEL_OPTIONS, isFuelKey } from "@/lib/fuels";
+import { FUEL_FILTER_OPTIONS } from "@/lib/fuels";
 
-/** Pastilles de type de carburant, "Tous" inclus (pas de filtre `carburant`). */
+/** Pastilles de type de carburant (par famille), "Tous" inclus (pas de filtre `carburant`). */
 export function FuelFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const current = searchParams.get("carburant");
-  const active = current && isFuelKey(current) ? current : null;
+  const active = searchParams.get("carburant");
+  const activeFamily = FUEL_FILTER_OPTIONS.find((option) => option.key === active);
 
-  function setFuel(key: string | null) {
+  function setCarburant(key: string | null) {
     const params = new URLSearchParams(searchParams.toString());
     if (key) {
       params.set("carburant", key);
@@ -26,24 +26,31 @@ export function FuelFilter() {
   }
 
   return (
-    <div className="fuel-pills" role="group" aria-label="Type de carburant">
-      <button
-        type="button"
-        className={`fuel-pill${active === null ? " fuel-pill--active" : ""}`}
-        onClick={() => setFuel(null)}
-      >
-        Tous
-      </button>
-      {FUEL_OPTIONS.map(({ key, label }) => (
+    <div>
+      <div className="fuel-pills" role="group" aria-label="Type de carburant">
         <button
-          key={key}
           type="button"
-          className={`fuel-pill${active === key ? " fuel-pill--active" : ""}`}
-          onClick={() => setFuel(key)}
+          className={`fuel-pill${active === null ? " fuel-pill--active" : ""}`}
+          onClick={() => setCarburant(null)}
         >
-          {label}
+          Tous
         </button>
-      ))}
+        {FUEL_FILTER_OPTIONS.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            className={`fuel-pill${active === key ? " fuel-pill--active" : ""}`}
+            onClick={() => setCarburant(key)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {activeFamily && activeFamily.fields.length > 1 && (
+        <p className="fuel-pills__hint">
+          Inclut les stations {activeFamily.fields.map((f) => f.toUpperCase()).join(" et ")}
+        </p>
+      )}
     </div>
   );
 }

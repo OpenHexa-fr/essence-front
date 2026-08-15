@@ -1,22 +1,22 @@
 import Link from "next/link";
 
 import type { Station } from "@/lib/api";
-import { FUEL_OPTIONS, type FuelKey } from "@/lib/fuels";
+import { labelForCarburant } from "@/lib/fuels";
 
 interface StationCardProps {
   station: Station;
   active?: boolean;
   onHover?: () => void;
-  /** Carburant actuellement filtré : son prix est mis en avant s'il est disponible. */
-  carburant?: FuelKey;
+  /** Carburant (ou famille) actuellement filtré. */
+  carburant?: string;
+  /** Prix affiché, déjà résolu (le moins cher de la famille le cas échéant) par l'appelant. */
+  price: number | null;
   distanceKm?: number | null;
-  /** Position (0-based) dans la liste triée courante : numérote les 3 premiers, comme sur la carte. */
-  rank?: number;
-  /** N'affiche le badge "★ Meilleur prix" que si le tri courant est bien le prix. */
-  highlightBestPrice?: boolean;
+  /** Score de pertinence 0-100 (prix + distance), calculé par l'appelant. */
+  score?: number | null;
+  /** "Le plus proche" / "Meilleur prix" / "Meilleur compromis", au plus un par recherche. */
+  badge?: string;
 }
-
-const TOP_RANK_COUNT = 3;
 
 function directionsUrl(lat: number, lon: number): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
@@ -27,15 +27,12 @@ export function StationCard({
   active,
   onHover,
   carburant,
+  price,
   distanceKm,
-  rank,
-  highlightBestPrice,
+  score,
+  badge,
 }: StationCardProps) {
-  const preferredFuel = carburant
-    ? FUEL_OPTIONS.find(({ key }) => key === carburant && station[key] !== null)
-    : undefined;
-  const displayedFuel = preferredFuel ?? FUEL_OPTIONS.find(({ key }) => station[key] !== null);
-  const isTopRank = rank != null && rank < TOP_RANK_COUNT;
+  const fuelLabel = labelForCarburant(carburant);
   const title = station.nom ?? station.adresse ?? "Station";
   const initial = title.trim().charAt(0).toUpperCase() || "?";
 
@@ -46,9 +43,7 @@ export function StationCard({
     >
       <Link href={`/station/${encodeURIComponent(station.station_id)}`} className="result-item__body">
         <div className="result-item__header">
-          <span className={`result-item__avatar${isTopRank ? " result-item__avatar--rank" : ""}`}>
-            {isTopRank ? (rank as number) + 1 : initial}
-          </span>
+          <span className="result-item__avatar">{initial}</span>
           <div className="result-item__headline">
             <p className="result-item__title">{title}</p>
             <p className="result-item__meta">
@@ -58,14 +53,18 @@ export function StationCard({
               )}
             </p>
           </div>
+          {score != null && (
+            <span className="result-item__score" title="Score de pertinence (prix + distance)">
+              <strong>{score}</strong>
+              <span>/100</span>
+            </span>
+          )}
         </div>
-        {highlightBestPrice && rank === 0 && (
-          <span className="result-item__badge">★ Meilleur prix</span>
-        )}
-        {displayedFuel && (
+        {badge && <span className="result-item__badge">★ {badge}</span>}
+        {price != null && (
           <div className="result-item__price-row">
-            <span className="result-item__price">{station[displayedFuel.key]?.toFixed(3)} €</span>
-            <span className="result-item__fuel">{displayedFuel.label}</span>
+            <span className="result-item__price">{price.toFixed(3)} €</span>
+            {fuelLabel && <span className="result-item__fuel">{fuelLabel}</span>}
           </div>
         )}
         {station.mise_a_jour && (

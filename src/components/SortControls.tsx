@@ -3,18 +3,19 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
 import type { StationSort } from "@/lib/api";
-import { isFuelKey } from "@/lib/fuels";
+import { isCarburantParam } from "@/lib/fuels";
 
 const TABS: {
   key: StationSort;
   label: string;
+  icon: string;
   requiresLocation?: boolean;
   requiresFuel?: boolean;
 }[] = [
-  { key: "score", label: "Score", requiresFuel: true },
-  { key: "prix", label: "Prix", requiresFuel: true },
-  { key: "distance", label: "Distance", requiresLocation: true },
-  { key: "recent", label: "Récent" },
+  { key: "score", label: "Score", icon: "★", requiresFuel: true },
+  { key: "prix", label: "Prix", icon: "€", requiresFuel: true },
+  { key: "distance", label: "Distance", icon: "📍", requiresLocation: true },
+  { key: "recent", label: "Récent", icon: "🕐" },
 ];
 
 export function SortControls() {
@@ -22,7 +23,7 @@ export function SortControls() {
   const searchParams = useSearchParams();
   const hasLocation = searchParams.has("lat") && searchParams.has("lon");
   const carburant = searchParams.get("carburant");
-  const hasFuel = carburant !== null && isFuelKey(carburant);
+  const hasFuel = carburant !== null && isCarburantParam(carburant);
   const activeTri = (searchParams.get("tri") as StationSort | null) ?? (hasFuel ? "score" : "recent");
 
   function setTri(tri: StationSort) {
@@ -33,7 +34,7 @@ export function SortControls() {
 
   return (
     <div className="sort-controls" role="group" aria-label="Trier les résultats">
-      {TABS.map(({ key, label, requiresLocation, requiresFuel }) => {
+      {TABS.map(({ key, label, icon, requiresLocation, requiresFuel }) => {
         const disabled = (requiresLocation && !hasLocation) || (requiresFuel && !hasFuel);
         const title = requiresLocation && !hasLocation
           ? "Recherchez une adresse ou utilisez « Autour de moi » pour trier par distance"
@@ -49,7 +50,7 @@ export function SortControls() {
             disabled={disabled}
             title={title}
           >
-            {label}
+            <span aria-hidden="true">{icon}</span> {label}
           </button>
         );
       })}
