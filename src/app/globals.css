@@ -526,7 +526,9 @@ main {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   padding: 14px 16px 16px;
-  z-index: 500;
+  /* Même raison que .map-layout__panel en mobile : au-dessus des panes
+     internes de Leaflet (jusqu'à 700). */
+  z-index: 1000;
 }
 
 .station-detail-panel__header {
@@ -1098,7 +1100,12 @@ main {
     max-height: 78vh;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     box-shadow: 0 -4px 20px rgba(32, 33, 36, 0.25);
-    z-index: 30;
+    /* Largement au-dessus des panes internes de Leaflet (jusqu'à 700, ex.
+       markerPane/popupPane) : sans isolation de contexte d'empilement propre
+       à .leaflet-container, leurs z-index élevés se comparent directement aux
+       nôtres et repeignent par-dessus la feuille — vu en conditions réelles
+       sur mobile (la carte "passait devant" par intermittence). */
+    z-index: 1000;
     transition: max-height 0.25s ease;
   }
 
