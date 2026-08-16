@@ -13,9 +13,10 @@ interface MapProps {
   zoom?: number;
   userLocation?: UserLocation | null;
   showRank?: boolean;
+  onMarkerClick?: (id: string) => void;
 }
 
-export function Map({ markers, activeId, zoom, userLocation, showRank }: MapProps) {
+export function Map({ markers, activeId, zoom, userLocation, showRank, onMarkerClick }: MapProps) {
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <LeafletMapInner
@@ -24,6 +25,7 @@ export function Map({ markers, activeId, zoom, userLocation, showRank }: MapProp
         zoom={zoom}
         userLocation={userLocation}
         showRank={showRank}
+        onMarkerClick={onMarkerClick}
       />
     </div>
   );

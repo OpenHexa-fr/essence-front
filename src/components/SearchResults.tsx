@@ -7,10 +7,11 @@ import { Map as StationMap } from "@/components/Map";
 import { SearchBar } from "@/components/SearchBar";
 import { SortControls } from "@/components/SortControls";
 import { StationCard } from "@/components/StationCard";
+import { StationDetailPanel } from "@/components/StationDetailPanel";
 import type { Station, StationSort } from "@/lib/api";
 import { distanceKm } from "@/lib/geo";
 import { priceForCarburant } from "@/lib/fuels";
-import { computeScore, pickTopStations } from "@/lib/score";
+import { computeScore, labelTopStations } from "@/lib/score";
 import { formatRelativeFreshness, mostRecent } from "@/lib/time";
 
 interface SearchResultsProps {
@@ -35,6 +36,7 @@ export function SearchResults({
   effectiveRadiusKm,
 }: SearchResultsProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const radiusKm = effectiveRadiusKm ?? requestedRadiusKm ?? 10;
 
   const distances = useMemo(() => {
@@ -49,28 +51,33 @@ export function SearchResults({
   }, [items, userLocation]);
 
   // Prix affiché + score par station, calculés une fois pour servir à la fois
-  // aux marqueurs de la carte, aux cartes de résultat et aux badges "à la une".
-  const priced = useMemo(
-    () =>
-      items.map((station) => {
-        const price = priceForCarburant(station, carburant);
-        const distance = distances.get(station.station_id) ?? null;
-        return { station, price, distance, score: computeScore(price, distance, radiusKm) };
-      }),
-    [items, carburant, distances, radiusKm],
-  );
+  // aux marqueurs de la carte, aux cartes de résultat et au panneau de détail.
+  const priced = useMemo(() => {
+    const prices = items.map((station) => priceForCarburant(station, carburant));
+    const minPrice = prices.some((p) => p != null) ? Math.min(...prices.filter((p): p is number => p != null)) : null;
+
+    return items.map((station, index) => {
+      const price = prices[index];
+      const distance = distances.get(station.station_id) ?? null;
+      const score = computeScore(price, minPrice, distance, radiusKm, station.mise_a_jour);
+      return { station, price, distance, score };
+    });
+  }, [items, carburant, distances, radiusKm]);
+
+  // Les 3 premières places (avec étiquette) forment "Top 3", le reste "Autres"
+  // — façon comparateur de prix, indépendamment du tri courant.
+  const topCount = Math.min(3, priced.length);
 
   const badges = useMemo(
     () =>
-      pickTopStations(
-        priced.map(({ station, price, distance, score }) => ({
+      labelTopStations(
+        priced.map(({ station, score }) => ({
           stationId: station.station_id,
-          price,
-          distanceKm: distance,
-          score,
+          breakdown: score?.breakdown ?? null,
         })),
+        topCount,
       ),
-    [priced],
+    [priced, topCount],
   );
 
   const markers = priced
@@ -91,9 +98,7 @@ export function SearchResults({
   const radiusWasExpanded =
     requestedRadiusKm != null && effectiveRadiusKm != null && effectiveRadiusKm > requestedRadiusKm;
 
-  // Les 3 premières places (avec badge) forment "TOP 3", le reste "AUTRES" —
-  // façon comparateur de prix, indépendamment du tri courant.
-  const topCount = Math.min(3, priced.length);
+  const selected = priced.find(({ station }) => station.station_id === selectedId) ?? null;
 
   return (
     <div className="map-layout">
@@ -148,7 +153,23 @@ export function SearchResults({
         </div>
       </div>
       <div className="map-layout__map">
-        <StationMap markers={markers} activeId={activeId} userLocation={userLocation} showRank />
+        <StationMap
+          markers={markers}
+          activeId={activeId}
+          userLocation={userLocation}
+          showRank
+          onMarkerClick={setSelectedId}
+        />
+        {selected && (
+          <StationDetailPanel
+            station={selected.station}
+            carburant={carburant}
+            price={selected.price}
+            distanceKm={selected.distance}
+            score={selected.score}
+            onClose={() => setSelectedId(null)}
+          />
+        )}
       </div>
     </div>
   );

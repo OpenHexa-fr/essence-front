@@ -25,6 +25,7 @@ interface LeafletMapInnerProps {
   userLocation?: UserLocation | null;
   /** Affiche des pastilles numérotées 1-2-3 pour les premiers marqueurs (résultats classés). */
   showRank?: boolean;
+  onMarkerClick?: (id: string) => void;
 }
 
 const FRANCE_CENTER: [number, number] = [46.6, 2.2];
@@ -88,6 +89,7 @@ export default function LeafletMapInner({
   zoom = 13,
   userLocation,
   showRank = false,
+  onMarkerClick,
 }: LeafletMapInnerProps) {
   const center: [number, number] = userLocation
     ? [userLocation.lat, userLocation.lon]
@@ -128,12 +130,12 @@ export default function LeafletMapInner({
             ? priceIcon(marker.price)
             : dotIcon();
         return (
-          <Marker key={marker.id} position={[marker.lat, marker.lon]} icon={icon}>
-            <Popup>
-              {marker.label}
-              {marker.price != null && <> — {marker.price.toFixed(3)} €</>}
-            </Popup>
-          </Marker>
+          <Marker
+            key={marker.id}
+            position={[marker.lat, marker.lon]}
+            icon={icon}
+            eventHandlers={onMarkerClick ? { click: () => onMarkerClick(marker.id) } : undefined}
+          />
         );
       })}
     </MapContainer>

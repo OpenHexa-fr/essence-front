@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 import type { Station } from "@/lib/api";
 import { labelForCarburant } from "@/lib/fuels";
+import { scoreTier, type ScoreResult } from "@/lib/score";
 
 interface StationCardProps {
   station: Station;
@@ -12,11 +16,17 @@ interface StationCardProps {
   /** Prix affiché, déjà résolu (le moins cher de la famille le cas échéant) par l'appelant. */
   price: number | null;
   distanceKm?: number | null;
-  /** Score de pertinence 0-100 (prix + distance), calculé par l'appelant. */
-  score?: number | null;
+  /** Score de pertinence 0-100 + décomposition, calculé par l'appelant. */
+  score?: ScoreResult | null;
   /** "Le plus proche" / "Meilleur prix" / "Meilleur compromis", au plus un par recherche. */
   badge?: string;
 }
+
+const BREAKDOWN_LABELS: { key: "price" | "distance" | "freshness"; label: string }[] = [
+  { key: "price", label: "Prix" },
+  { key: "distance", label: "Distance" },
+  { key: "freshness", label: "Fraîcheur" },
+];
 
 function directionsUrl(lat: number, lon: number): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
@@ -32,6 +42,7 @@ export function StationCard({
   score,
   badge,
 }: StationCardProps) {
+  const [showBreakdown, setShowBreakdown] = useState(false);
   const fuelLabel = labelForCarburant(carburant);
   const title = station.nom ?? station.adresse ?? "Station";
   const initial = title.trim().charAt(0).toUpperCase() || "?";
@@ -54,10 +65,37 @@ export function StationCard({
             </p>
           </div>
           {score != null && (
-            <span className="result-item__score" title="Score de pertinence (prix + distance)">
-              <strong>{score}</strong>
-              <span>/100</span>
-            </span>
+            <div className="result-item__score-wrap">
+              <button
+                type="button"
+                className={`result-item__score result-item__score--${scoreTier(score.score)}`}
+                title="Score de pertinence (prix, distance, fraîcheur)"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setShowBreakdown((value) => !value);
+                }}
+              >
+                <strong>{score.score}</strong>
+                <span>/100</span>
+              </button>
+              {showBreakdown && (
+                <div className="result-item__score-panel" onClick={(event) => event.stopPropagation()}>
+                  {BREAKDOWN_LABELS.map(({ key, label }) => (
+                    <div key={key} className="result-item__score-row">
+                      <span className="result-item__score-row-label">{label}</span>
+                      <div className="result-item__score-track">
+                        <div
+                          className="result-item__score-fill"
+                          style={{ width: `${score.breakdown[key]}%` }}
+                        />
+                      </div>
+                      <span className="result-item__score-row-value">{score.breakdown[key]}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
         {badge && <span className="result-item__badge">★ {badge}</span>}
