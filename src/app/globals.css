@@ -228,7 +228,7 @@ main {
 .filters-panel {
   border-top: 1px solid var(--color-border);
   margin-top: 12px;
-  padding-top: 10px;
+  padding: 10px 16px 0;
 }
 
 .filters-panel__toggle {
@@ -397,10 +397,48 @@ main {
   z-index: 10;
 }
 
+/* Poignée de la feuille inférieure (mobile uniquement, voir media query
+   plus bas) : invisible et sans effet en desktop. */
+.map-layout__handle {
+  display: none;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 8px 0 2px;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.map-layout__handle-pill {
+  width: 36px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-border);
+}
+
+.map-layout__handle-hint {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
 .map-layout__panel-header {
   padding: 16px 16px 12px;
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
+}
+
+/* Contient tri/filtres/liste : masqué par la poignée quand la feuille est
+   repliée sur mobile (voir media query) ; identique à l'existant en desktop. */
+.map-layout__panel-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .map-layout__toolbar {
@@ -408,6 +446,7 @@ main {
   flex-direction: column;
   gap: 8px;
   margin-top: 12px;
+  padding: 0 16px;
 }
 
 .map-layout__count {
@@ -1035,6 +1074,9 @@ main {
 }
 
 /* Responsive : carte + panneau -> feuille inférieure (bottom sheet) */
+/* Mobile : feuille inférieure repliable, façon pump-price.draclest.ovh
+   (carte plein écran + feuille superposée), en-tête (recherche) toujours
+   visible, corps (tri/filtres/liste) masquable via la poignée. */
 @media (max-width: 768px) {
   .map-layout {
     flex-direction: column;
@@ -1053,9 +1095,26 @@ main {
     right: 0;
     bottom: 0;
     width: auto;
-    max-height: 70vh;
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
-    box-shadow: 0 -2px 10px rgba(32, 33, 36, 0.2);
+    max-height: 78vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 20px rgba(32, 33, 36, 0.25);
     z-index: 30;
+    transition: max-height 0.25s ease;
+  }
+
+  .map-layout__panel--collapsed {
+    max-height: 128px;
+  }
+
+  .map-layout__handle {
+    display: flex;
+  }
+
+  .map-layout__panel-body {
+    overflow-y: auto;
+  }
+
+  .map-layout__panel--collapsed .map-layout__panel-body {
+    display: none;
   }
 }

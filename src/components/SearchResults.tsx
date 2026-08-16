@@ -37,6 +37,10 @@ export function SearchResults({
 }: SearchResultsProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Feuille inférieure repliable sur mobile uniquement (sans effet en desktop,
+  // voir le media query dans globals.css) : dépliée par défaut pour ne pas
+  // masquer les résultats d'une recherche qui vient d'arriver.
+  const [mobileExpanded, setMobileExpanded] = useState(true);
   const radiusKm = effectiveRadiusKm ?? requestedRadiusKm ?? 10;
 
   const distances = useMemo(() => {
@@ -102,11 +106,23 @@ export function SearchResults({
 
   return (
     <div className="map-layout">
-      <div className="map-layout__panel">
+      <div className={`map-layout__panel${mobileExpanded ? "" : " map-layout__panel--collapsed"}`}>
+        <button
+          type="button"
+          className="map-layout__handle"
+          onClick={() => setMobileExpanded((value) => !value)}
+          aria-expanded={mobileExpanded}
+          aria-label={mobileExpanded ? "Réduire la liste" : "Afficher la liste"}
+        >
+          <span className="map-layout__handle-pill" />
+          {!mobileExpanded && <span className="map-layout__handle-hint">{total} station(s)</span>}
+        </button>
         <div className="map-layout__panel-header">
           <Suspense fallback={null}>
             <SearchBar variant="panel" />
           </Suspense>
+        </div>
+        <div className="map-layout__panel-body">
           <div className="map-layout__toolbar">
             <Suspense fallback={null}>
               <SortControls />
@@ -116,40 +132,40 @@ export function SearchResults({
           <Suspense fallback={null}>
             <FiltersPanel />
           </Suspense>
-        </div>
-        <div className="map-layout__list">
-          {radiusWasExpanded && (
-            <p className="map-layout__notice">
-              Aucune station à moins de {requestedRadiusKm} km — rayon élargi à{" "}
-              {effectiveRadiusKm} km.
-            </p>
-          )}
-          {items.length === 0 && (
-            <p className="map-layout__empty">
-              Aucune station trouvée, même en élargissant le rayon de recherche.
-            </p>
-          )}
-          {topCount > 0 && <p className="map-layout__section-title">Top {topCount}</p>}
-          {priced.map(({ station, price, distance, score }, index) => (
-            <Fragment key={`${station.station_id}-${index}`}>
-              {index === topCount && index < priced.length && (
-                <p className="map-layout__section-title">
-                  Autres <span className="map-layout__section-count">{priced.length - topCount}</span>
-                </p>
-              )}
-              <StationCard
-                station={station}
-                active={activeId === station.station_id}
-                onHover={() => setActiveId(station.station_id)}
-                carburant={carburant}
-                price={price}
-                distanceKm={distance}
-                score={score}
-                badge={tri !== "recent" ? badges.get(station.station_id) : undefined}
-              />
-            </Fragment>
-          ))}
-          {freshness && <p className="map-layout__freshness">Données collectées {freshness}</p>}
+          <div className="map-layout__list">
+            {radiusWasExpanded && (
+              <p className="map-layout__notice">
+                Aucune station à moins de {requestedRadiusKm} km — rayon élargi à{" "}
+                {effectiveRadiusKm} km.
+              </p>
+            )}
+            {items.length === 0 && (
+              <p className="map-layout__empty">
+                Aucune station trouvée, même en élargissant le rayon de recherche.
+              </p>
+            )}
+            {topCount > 0 && <p className="map-layout__section-title">Top {topCount}</p>}
+            {priced.map(({ station, price, distance, score }, index) => (
+              <Fragment key={`${station.station_id}-${index}`}>
+                {index === topCount && index < priced.length && (
+                  <p className="map-layout__section-title">
+                    Autres <span className="map-layout__section-count">{priced.length - topCount}</span>
+                  </p>
+                )}
+                <StationCard
+                  station={station}
+                  active={activeId === station.station_id}
+                  onHover={() => setActiveId(station.station_id)}
+                  carburant={carburant}
+                  price={price}
+                  distanceKm={distance}
+                  score={score}
+                  badge={tri !== "recent" ? badges.get(station.station_id) : undefined}
+                />
+              </Fragment>
+            ))}
+            {freshness && <p className="map-layout__freshness">Données collectées {freshness}</p>}
+          </div>
         </div>
       </div>
       <div className="map-layout__map">
