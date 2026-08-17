@@ -63,8 +63,11 @@ function rankIcon(rank: number): L.DivIcon {
   return L.divIcon({
     className: "map-marker-rank",
     html: `<span>${rank}</span>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
+    // Doit rester synchronisé avec width/height de .map-marker-rank dans
+    // globals.css : Leaflet fixe la taille en style inline à partir d'ici, ce
+    // qui écrase toute valeur définie en CSS externe (non !important).
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
   });
 }
 
