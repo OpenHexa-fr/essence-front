@@ -47,7 +47,15 @@ export interface StationSearchParams {
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
-  next_search_after: unknown[] | null;
+  /** `"gte"` signale un total plafonné par Elasticsearch (10 000), pas un décompte exact. */
+  total_relation?: "eq" | "gte" | null;
+  /** Curseur opaque de page suivante, à renvoyer tel quel. */
+  next_cursor?: string | null;
+}
+
+/** Formate un décompte en tenant compte d'un éventuel plafonnement Elasticsearch. */
+export function formatTotal(total: number, relation?: "eq" | "gte" | null): string {
+  return relation === "gte" ? `plus de ${total}` : String(total);
 }
 
 function buildQueryString(params: Record<string, unknown>): string {

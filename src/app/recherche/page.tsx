@@ -139,6 +139,7 @@ async function ResultsLoader({ searchParams }: RecherchePageProps) {
     <SearchResults
       items={results.items}
       total={results.total}
+      totalRelation={results.total_relation}
       carburant={carburant}
       tri={tri}
       userLocation={userLocation}

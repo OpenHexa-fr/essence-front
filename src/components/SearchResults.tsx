@@ -8,7 +8,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { SortControls } from "@/components/SortControls";
 import { StationCard } from "@/components/StationCard";
 import { StationDetailPanel } from "@/components/StationDetailPanel";
-import type { Station, StationSort } from "@/lib/api";
+import { formatTotal, type Station, type StationSort } from "@/lib/api";
 import { distanceKm, hasValidLocation } from "@/lib/geo";
 import { priceForCarburant } from "@/lib/fuels";
 import { computeScore, labelTopStations } from "@/lib/score";
@@ -17,6 +17,7 @@ import { formatRelativeFreshness, mostRecent } from "@/lib/time";
 interface SearchResultsProps {
   items: Station[];
   total: number;
+  totalRelation?: "eq" | "gte" | null;
   carburant?: string;
   tri?: StationSort;
   userLocation?: { lat: number; lon: number } | null;
@@ -29,6 +30,7 @@ interface SearchResultsProps {
 export function SearchResults({
   items,
   total,
+  totalRelation,
   carburant,
   tri,
   userLocation,
@@ -115,7 +117,7 @@ export function SearchResults({
           aria-label={mobileExpanded ? "Réduire la liste" : "Afficher la liste"}
         >
           <span className="map-layout__handle-pill" />
-          {!mobileExpanded && <span className="map-layout__handle-hint">{total} station(s)</span>}
+          {!mobileExpanded && <span className="map-layout__handle-hint">{formatTotal(total, totalRelation)} station(s)</span>}
         </button>
         <div className="map-layout__panel-header">
           <Suspense fallback={null}>
@@ -127,7 +129,7 @@ export function SearchResults({
             <Suspense fallback={null}>
               <SortControls />
             </Suspense>
-            <p className="map-layout__count">{total} station(s) trouvée(s)</p>
+            <p className="map-layout__count">{formatTotal(total, totalRelation)} station(s) trouvée(s)</p>
           </div>
           <Suspense fallback={null}>
             <FiltersPanel />
