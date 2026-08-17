@@ -1,5 +1,6 @@
 import type { Station } from "@/lib/api";
 import { labelForCarburant } from "@/lib/fuels";
+import { hasValidLocation } from "@/lib/geo";
 import { scoreTier, type ScoreResult } from "@/lib/score";
 
 interface StationDetailPanelProps {
@@ -79,7 +80,7 @@ export function StationDetailPanel({
         </div>
       )}
 
-      {station.location && (
+      {hasValidLocation(station.location) && (
         <a
           href={directionsUrl(station.location.lat, station.location.lon)}
           target="_blank"

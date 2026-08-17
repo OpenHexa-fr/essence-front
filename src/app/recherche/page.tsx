@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { SearchResults } from "@/components/SearchResults";
 import type { PaginatedResponse, Station, StationSort } from "@/lib/api";
 import { searchStations } from "@/lib/api";
-import { DEFAULT_RADIUS_KM, isCarburantParam } from "@/lib/fuels";
+import { ALL_FUELS_PARAM, DEFAULT_CARBURANT_PARAM, DEFAULT_RADIUS_KM, isCarburantParam } from "@/lib/fuels";
 
 // Rayons essayés successivement quand la recherche ne trouve rien au rayon
 // demandé (fréquent avec le rayon par défaut de 5 km hors des grandes villes) :
@@ -21,10 +21,18 @@ interface RecherchePageProps {
   };
 }
 
-/** "Tous" (pas de carburant précis) est un état valide, pas juste un repli sur DEFAULT_FUEL.
- * `value` peut être une clé de famille (ex. "sans_plomb") ou un carburant simple. */
+/**
+ * Résout le carburant effectif :
+ * - paramètre absent (aucun choix encore fait) → défaut (Sans-plomb), pour
+ *   afficher des prix sur la carte dès l'arrivée sur la page ;
+ * - "tous" (choix explicite) → undefined, aucun carburant précis ;
+ * - une famille ou un carburant simple valide → tel quel ;
+ * - une valeur invalide → repli sur le défaut.
+ */
 function resolveCarburant(value: string | undefined): string | undefined {
-  return value && isCarburantParam(value) ? value : undefined;
+  if (value === undefined) return DEFAULT_CARBURANT_PARAM;
+  if (value === ALL_FUELS_PARAM) return undefined;
+  return isCarburantParam(value) ? value : DEFAULT_CARBURANT_PARAM;
 }
 
 /**

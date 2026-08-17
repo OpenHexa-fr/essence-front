@@ -9,7 +9,7 @@ import { SortControls } from "@/components/SortControls";
 import { StationCard } from "@/components/StationCard";
 import { StationDetailPanel } from "@/components/StationDetailPanel";
 import type { Station, StationSort } from "@/lib/api";
-import { distanceKm } from "@/lib/geo";
+import { distanceKm, hasValidLocation } from "@/lib/geo";
 import { priceForCarburant } from "@/lib/fuels";
 import { computeScore, labelTopStations } from "@/lib/score";
 import { formatRelativeFreshness, mostRecent } from "@/lib/time";
@@ -46,7 +46,7 @@ export function SearchResults({
   const distances = useMemo(() => {
     if (!userLocation) return new Map<string, number>();
     const entries = items
-      .filter((station) => station.location !== null)
+      .filter((station) => hasValidLocation(station.location))
       .map(
         (station) =>
           [station.station_id, distanceKm(userLocation, station.location!)] as const,
@@ -85,7 +85,7 @@ export function SearchResults({
   );
 
   const markers = priced
-    .filter(({ station }) => station.location !== null)
+    .filter(({ station }) => hasValidLocation(station.location))
     .map(({ station, price }) => ({
       id: station.station_id,
       lat: station.location!.lat,
@@ -156,6 +156,13 @@ export function SearchResults({
                   station={station}
                   active={activeId === station.station_id}
                   onHover={() => setActiveId(station.station_id)}
+                  onSelect={() => {
+                    setActiveId(station.station_id);
+                    setSelectedId(station.station_id);
+                    // Sans effet en desktop (voir globals.css) ; sur mobile,
+                    // évite que la feuille dépliée masque le panneau de détail.
+                    setMobileExpanded(false);
+                  }}
                   carburant={carburant}
                   price={price}
                   distanceKm={distance}

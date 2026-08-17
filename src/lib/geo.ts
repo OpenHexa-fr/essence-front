@@ -1,5 +1,15 @@
 const EARTH_RADIUS_KM = 6371;
 
+/** True si `location` a des coordonnées exploitables (pas null, pas NaN/Infinity).
+ * Une donnée source malformée (lat/lon non numériques) fait planter Leaflet
+ * (`Invalid LatLng object`) si elle n'est pas filtrée en amont — vu en
+ * conditions réelles sur une station avec une géolocalisation invalide. */
+export function hasValidLocation(
+  location: { lat: number; lon: number } | null | undefined,
+): location is { lat: number; lon: number } {
+  return location != null && Number.isFinite(location.lat) && Number.isFinite(location.lon);
+}
+
 /** Distance à vol d'oiseau (formule de haversine), en kilomètres. */
 export function distanceKm(
   from: { lat: number; lon: number },

@@ -1,16 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 import type { Station } from "@/lib/api";
 import { labelForCarburant } from "@/lib/fuels";
+import { hasValidLocation } from "@/lib/geo";
 import { scoreTier, type ScoreResult } from "@/lib/score";
 
 interface StationCardProps {
   station: Station;
   active?: boolean;
   onHover?: () => void;
+  /** Ouvre le panneau de détail (même comportement qu'un clic sur un marqueur de la carte). */
+  onSelect?: () => void;
   /** Carburant (ou famille) actuellement filtré. */
   carburant?: string;
   /** Prix affiché, déjà résolu (le moins cher de la famille le cas échéant) par l'appelant. */
@@ -36,6 +38,7 @@ export function StationCard({
   station,
   active,
   onHover,
+  onSelect,
   carburant,
   price,
   distanceKm,
@@ -52,7 +55,19 @@ export function StationCard({
       className={`result-item${active ? " result-item--active" : ""}`}
       onMouseEnter={onHover}
     >
-      <Link href={`/station/${encodeURIComponent(station.station_id)}`} className="result-item__body">
+      <div
+        className="result-item__body"
+        role="button"
+        tabIndex={0}
+        aria-label={`Voir le détail de ${title}`}
+        onClick={onSelect}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelect?.();
+          }
+        }}
+      >
         <div className="result-item__header">
           <span className="result-item__avatar">{initial}</span>
           <div className="result-item__headline">
@@ -110,8 +125,8 @@ export function StationCard({
             Mis à jour le {new Date(station.mise_a_jour).toLocaleDateString("fr-FR")}
           </p>
         )}
-      </Link>
-      {station.location && (
+      </div>
+      {hasValidLocation(station.location) && (
         <a
           href={directionsUrl(station.location.lat, station.location.lon)}
           target="_blank"

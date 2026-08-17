@@ -38,14 +38,28 @@ export const FUEL_FILTER_OPTIONS: FuelFilterOption[] = [
   { key: "gazole", label: "Diesel", fields: ["gazole"] },
 ];
 
-/** Un paramètre `carburant` valide : une clé de FUEL_FILTER_OPTIONS, ou un FuelKey brut (compat directe). */
+/** Valeur explicite du paramètre `carburant` pour "Tous" (pas de carburant précis).
+ * Doit être un vrai paramètre d'URL (pas juste l'absence du paramètre) pour
+ * distinguer "l'utilisateur a choisi Tous" de "aucun choix encore fait" —
+ * ce dernier retombe sur DEFAULT_CARBURANT_PARAM, pas sur Tous. */
+export const ALL_FUELS_PARAM = "tous";
+
+/** Carburant sélectionné par défaut à l'arrivée sur la recherche (avant tout
+ * choix explicite) : Sans-plomb, pour afficher des prix sur la carte d'emblée. */
+export const DEFAULT_CARBURANT_PARAM = "sans_plomb";
+
+/** Un paramètre `carburant` valide : "Tous", une clé de FUEL_FILTER_OPTIONS, ou un FuelKey brut (compat directe). */
 export function isCarburantParam(value: string): boolean {
-  return FUEL_FILTER_OPTIONS.some((option) => option.key === value) || isFuelKey(value);
+  return (
+    value === ALL_FUELS_PARAM ||
+    FUEL_FILTER_OPTIONS.some((option) => option.key === value) ||
+    isFuelKey(value)
+  );
 }
 
 /** Résout un paramètre `carburant` (famille ou carburant simple) en carburants réels. */
 export function fieldsForCarburant(value: string | null | undefined): FuelKey[] {
-  if (!value) return [];
+  if (!value || value === ALL_FUELS_PARAM) return [];
   const family = FUEL_FILTER_OPTIONS.find((option) => option.key === value);
   if (family) return family.fields;
   return isFuelKey(value) ? [value] : [];

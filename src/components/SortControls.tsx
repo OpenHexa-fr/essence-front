@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
 import type { StationSort } from "@/lib/api";
-import { isCarburantParam } from "@/lib/fuels";
+import { ALL_FUELS_PARAM, DEFAULT_CARBURANT_PARAM } from "@/lib/fuels";
 
 const TABS: {
   key: StationSort;
@@ -22,8 +22,8 @@ export function SortControls() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const hasLocation = searchParams.has("lat") && searchParams.has("lon");
-  const carburant = searchParams.get("carburant");
-  const hasFuel = carburant !== null && isCarburantParam(carburant);
+  const carburant = searchParams.get("carburant") ?? DEFAULT_CARBURANT_PARAM;
+  const hasFuel = carburant !== ALL_FUELS_PARAM;
   const activeTri = (searchParams.get("tri") as StationSort | null) ?? (hasFuel ? "score" : "recent");
 
   function setTri(tri: StationSort) {

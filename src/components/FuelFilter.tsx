@@ -2,25 +2,23 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { FUEL_FILTER_OPTIONS } from "@/lib/fuels";
+import { ALL_FUELS_PARAM, DEFAULT_CARBURANT_PARAM, FUEL_FILTER_OPTIONS } from "@/lib/fuels";
 
-/** Pastilles de type de carburant (par famille), "Tous" inclus (pas de filtre `carburant`). */
+/** Pastilles de type de carburant (par famille), "Tous" inclus. */
 export function FuelFilter() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const active = searchParams.get("carburant");
+  // Absence du paramètre = pas encore de choix explicite = défaut (Sans-plomb),
+  // pas "Tous" — voir DEFAULT_CARBURANT_PARAM.
+  const active = searchParams.get("carburant") ?? DEFAULT_CARBURANT_PARAM;
   const activeFamily = FUEL_FILTER_OPTIONS.find((option) => option.key === active);
 
-  function setCarburant(key: string | null) {
+  function setCarburant(key: string) {
     const params = new URLSearchParams(searchParams.toString());
-    if (key) {
-      params.set("carburant", key);
-    } else {
-      params.delete("carburant");
+    params.set("carburant", key);
+    if (key === ALL_FUELS_PARAM && (params.get("tri") === "prix" || params.get("tri") === "score")) {
       // Le tri par prix/score n'a plus de sens sans carburant précis.
-      if (params.get("tri") === "prix" || params.get("tri") === "score") {
-        params.delete("tri");
-      }
+      params.delete("tri");
     }
     router.push(`/recherche?${params.toString()}`);
   }
@@ -30,8 +28,8 @@ export function FuelFilter() {
       <div className="fuel-pills" role="group" aria-label="Type de carburant">
         <button
           type="button"
-          className={`fuel-pill${active === null ? " fuel-pill--active" : ""}`}
-          onClick={() => setCarburant(null)}
+          className={`fuel-pill${active === ALL_FUELS_PARAM ? " fuel-pill--active" : ""}`}
+          onClick={() => setCarburant(ALL_FUELS_PARAM)}
         >
           Tous
         </button>

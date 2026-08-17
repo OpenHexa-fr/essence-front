@@ -43,8 +43,15 @@ function FlyToActiveMarker({
   useEffect(() => {
     if (!activeId) return;
     const marker = markers.find((item) => item.id === activeId);
-    if (marker) {
+    if (!marker || !Number.isFinite(marker.lat) || !Number.isFinite(marker.lon)) return;
+    try {
+      // `flyTo` peut lever en interne (ex. calcul de projection Leaflet sur un
+      // conteneur pas encore correctement dimensionné) : jamais laisser une
+      // exception ici faire planter toute la page (error boundary) pour un
+      // simple raté d'animation de la carte — au pire, elle ne se déplace pas.
       map.flyTo([marker.lat, marker.lon], Math.max(map.getZoom(), 14), { duration: 0.5 });
+    } catch (error) {
+      console.warn("map_fly_to_failed", error);
     }
   }, [activeId, markers, map]);
 
@@ -122,7 +129,9 @@ export default function LeafletMapInner({
           <Popup>Votre position</Popup>
         </CircleMarker>
       )}
-      {markers.map((marker, index) => {
+      {markers
+        .filter((marker) => Number.isFinite(marker.lat) && Number.isFinite(marker.lon))
+        .map((marker, index) => {
         const isTopRank = showRank && index < TOP_RANK_COUNT;
         const icon = isTopRank
           ? rankIcon(index + 1)
